@@ -1,3 +1,6 @@
-.env
 .idea
+
+.env
+.env.testing
+
 node_modules
