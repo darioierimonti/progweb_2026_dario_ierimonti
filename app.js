@@ -9,4 +9,6 @@ app.use(express.json());
 app.use('/', require('./routes/web'));
 app.use('/api', require('./routes/api'));
 
+app.use(express.static(__dirname + '/public'));
+
 module.exports = app;
