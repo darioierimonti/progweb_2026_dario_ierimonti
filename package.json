@@ -9,7 +9,8 @@
     "migrate": "node --env-file=.env migrate.js",
     "test": "node --env-file=./.env.testing --test --test-concurrency=1 --require ./tests/setup.js 'tests/**/*.test.js'",
     "test:unit": "node --env-file=./.env.testing --test --test-concurrency=1 --require ./tests/setup.js 'tests/unit/*.test.js'",
-    "test:feature": "node --env-file=./.env.testing --test --test-concurrency=1 --require ./tests/setup.js 'tests/feature/*.test.js'"
+    "test:feature": "node --env-file=./.env.testing --test --test-concurrency=1 --require ./tests/setup.js 'tests/feature/*.test.js'",
+    "lint": "npx eslint"
   },
   "author": "Dario Ierimonti",
   "license": "ISC",
