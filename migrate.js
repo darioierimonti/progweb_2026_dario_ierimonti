@@ -46,12 +46,10 @@ async function migrate({ interactive = true } = {}) {
                 return;
             }
 
-            console.log("Creating database...");
             await testConnection.query(`CREATE DATABASE IF NOT EXISTS ${mysql.escapeId(dbName)}`);
-            console.log("Created");
         }
     } finally {
-        await testConnection.end();
+        testConnection.end();
     }
     // </editor-fold>
 
@@ -82,6 +80,8 @@ async function migrate({ interactive = true } = {}) {
 
         const sqlFiles = files.filter(file => file.endsWith('.sql')).sort();
 
+        let atLeastOneMigrationRan = false;
+
         for (const sqlFile of sqlFiles) {
             const migrationName = path.basename(sqlFile, '.sql');
 
@@ -89,7 +89,11 @@ async function migrate({ interactive = true } = {}) {
                 continue;
             }
 
-            console.log(`Running migration: \x1b[32m ${migrationName} \x1b[0m`);
+            if(require.main === module) {
+                console.log(`Running migration: \x1b[32m ${migrationName} \x1b[0m`);
+            }
+
+            atLeastOneMigrationRan = true;
 
             const migrationSql = fs.readFileSync(path.join(migrationsDir, sqlFile), 'utf8');
 
@@ -103,8 +107,19 @@ async function migrate({ interactive = true } = {}) {
             }
             await connection.execute('INSERT INTO migrations (migration_name) VALUES (?)', [migrationName]);
         }
+
+        if(require.main === module) {
+            if(! atLeastOneMigrationRan) {
+                console.log('Nothing to migrate.');
+                console.log('');
+            } else {
+                console.log('');
+                console.log('Migrations completed.');
+                console.log('');
+            }
+        }
     } finally {
-        await connection.end();
+        connection.end();
     }
 
     // </editor-fold>

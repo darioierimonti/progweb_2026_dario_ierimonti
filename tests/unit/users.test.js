@@ -25,6 +25,5 @@ it('can authenticate a user', async () => {
         password: password,
     });
 
-    console.log(password);
     assert.notEqual(null, await User.authenticate(user.email, password));
 });
