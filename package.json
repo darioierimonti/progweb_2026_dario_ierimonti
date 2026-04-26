@@ -7,7 +7,7 @@
     "start": "node --env-file=./.env app.js",
     "dev": "node --watch --env-file=./.env app.js",
     "migrate": "node --env-file=.env migrate.js",
-    "test": "node --test --env-file=./.env.testing"
+    "test": "node --env-file=./.env.testing --test --test-concurrency=1 --require ./tests/setup.js 'tests/**/*.test.js'"
   },
   "author": "Dario Ierimonti",
   "license": "ISC",

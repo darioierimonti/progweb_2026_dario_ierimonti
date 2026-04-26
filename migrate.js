@@ -3,7 +3,7 @@ const path = require('node:path');
 const mysql = require('mysql2/promise');
 const readline = require('node:readline/promises');
 
-async function migrate() {
+async function migrate({ interactive = true } = {}) {
     const dbHost = process.env.DB_HOST;
     const dbUser = process.env.DB_USER;
     const dbPassword = process.env.DB_PASSWORD;
@@ -15,42 +15,43 @@ async function migrate() {
     /**
      * Ensure connection to the database and check if the database exists
      */
-    try {
-        const testConnection = await mysql.createConnection({
-            host: dbHost,
-            user: dbUser,
-            password: dbPassword,
-        });
+    const testConnection = await mysql.createConnection({
+        host: dbHost,
+        user: dbUser,
+        password: dbPassword,
+    });
 
+    try {
         const [rows] = await testConnection.execute(
             'SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = ?',
             [dbName]
         );
 
-        if(rows.length === 0) {
-            const rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout,
-            });
+        if (rows.length === 0) {
+            let shouldCreate = !interactive;
 
-            const answer = await rl.question("Database does not exist. Do you want to create it? (y/n): ");
-            rl.close();
+            if (interactive) {
+                const rl = readline.createInterface({
+                    input: process.stdin,
+                    output: process.stdout,
+                });
 
-            if (answer.toLowerCase() === 'y') {
-                console.log("Creating database...");
-                await testConnection.query(`CREATE DATABASE IF NOT EXISTS ${mysql.escapeId(dbName)}`);
-                console.log("Created");
-            } else {
-                console.log("Exiting...");
-                process.exit(0);
+                const answer = await rl.question("Database does not exist. Do you want to create it? (y/n): ");
+                rl.close();
+                shouldCreate = answer.toLowerCase() === 'y';
             }
+
+            if (!shouldCreate) {
+                console.log("Exiting...");
+                return;
+            }
+
+            console.log("Creating database...");
+            await testConnection.query(`CREATE DATABASE IF NOT EXISTS ${mysql.escapeId(dbName)}`);
+            console.log("Created");
         }
-
-        testConnection.end();
-
-    } catch (err) {
-        console.error('Error connecting to the database:', err);
-        process.exit(1);
+    } finally {
+        await testConnection.end();
     }
     // </editor-fold>
 
@@ -59,19 +60,19 @@ async function migrate() {
     /**
      * Run migrations
      */
-    try {
-        const connection = await mysql.createConnection({
-            host: dbHost,
-            user: dbUser,
-            password: dbPassword,
-            database: dbName,
-        });
+    const connection = await mysql.createConnection({
+        host: dbHost,
+        user: dbUser,
+        password: dbPassword,
+        database: dbName,
+    });
 
+    try {
         await connection.execute(
             'CREATE TABLE IF NOT EXISTS migrations (id INT AUTO_INCREMENT PRIMARY KEY, migration_name VARCHAR(255), ran_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)'
         );
 
-        const [rows] = (await connection.execute('SELECT migration_name FROM migrations'));
+        const [rows] = await connection.execute('SELECT migration_name FROM migrations');
         const ranMigrations = rows.map(r => r.migration_name);
 
         const migrationsDir = path.join(__dirname, 'migrations');
@@ -84,11 +85,7 @@ async function migrate() {
         for (const sqlFile of sqlFiles) {
             const migrationName = path.basename(sqlFile, '.sql');
 
-            if(ranMigrations.includes(migrationName)) {
-                continue;
-            }
-
-            if(migrationName in ranMigrations) {
+            if (ranMigrations.includes(migrationName)) {
                 continue;
             }
 
@@ -106,21 +103,18 @@ async function migrate() {
             }
             await connection.execute('INSERT INTO migrations (migration_name) VALUES (?)', [migrationName]);
         }
-
-        process.exit(0);
-
-
-    } catch (err) {
-        console.error('Error connecting to the database:', err);
-        process.exit(1);
+    } finally {
+        await connection.end();
     }
 
     // </editor-fold>
-
-    process.exit(0);
 }
 
-migrate().catch(err => {
-    console.error(err);
-    process.exit(1);
-});
+module.exports = { migrate };
+
+if (require.main === module) {
+    migrate().catch(err => {
+        console.error(err);
+        process.exit(1);
+    });
+}
