@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node --env-file=./.env app.js",
     "dev": "node --watch --env-file=./.env app.js",
-    "test": "node --test --env-file=./.env"
+    "test": "node --test --env-file=./.env.testing"
   },
   "author": "Dario Ierimonti",
   "license": "ISC",
