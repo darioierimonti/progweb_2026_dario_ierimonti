@@ -4,8 +4,8 @@
   "description": "Progetto web realizzato per l'esame di Programmazion Web e Mobile - UNIPG",
   "main": "index.js",
   "scripts": {
-    "start": "node --env-file=./.env app.js",
-    "dev": "node --watch --env-file=./.env app.js",
+    "start": "node --env-file=./.env server.js",
+    "dev": "node --watch --env-file=./.env server.js",
     "migrate": "node --env-file=.env migrate.js",
     "test": "node --env-file=./.env.testing --test --test-concurrency=1 --require ./tests/setup.js 'tests/**/*.test.js'"
   },
