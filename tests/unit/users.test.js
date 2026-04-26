@@ -1,6 +1,5 @@
 const { it } = require('node:test');
 const assert = require('node:assert');
-const app = require('../../app');
 const User = require('../../models/user');
 
 const name = 'Test User';
