@@ -1,0 +1,23 @@
+{
+  "name": "progweb_2026_dario_ierimonti",
+  "version": "1.0.0",
+  "description": "Progetto web realizzato per l'esame di Programmazion Web e Mobile - UNIPG",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --env-file=./.env app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dario Ierimonti",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darioierimonti/progweb_2026_dario_ierimonti.git"
+  },
+  "bugs": {
+    "url": "https://github.com/darioierimonti/progweb_2026_dario_ierimonti/issues"
+  },
+  "homepage": "https://github.com/darioierimonti/progweb_2026_dario_ierimonti#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
