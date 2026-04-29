@@ -166,3 +166,32 @@ test('isAdmin returns false if user is not admin', async () => {
 
     assert.ok(!user.isAdmin());
 })
+
+test('tokenAuthenticate returns null if token is invalid', async () => {
+    assert.equal(null, await User.tokenAuthenticate('invalidtoken'));
+})
+
+test('tokenAuthenticate returns null if token is missing', async () => {
+    assert.equal(null, await User.tokenAuthenticate(null));
+})
+
+test('tokenAuthenticate returns null if token is empty', async () => {
+    assert.equal(null, await User.tokenAuthenticate(''));
+})
+
+test('tokenAuthenticate returns user if token is valid', async () => {
+    /**
+     * @type {null|User}
+     */
+    const user = await User.create({
+        name: name,
+        email: email,
+        password: password,
+    })
+
+    /**
+     * @type {null|User}
+     */
+    const authenticatedUser = await User.tokenAuthenticate(user.token);
+    assert.equal(user.id, authenticatedUser.id);
+})

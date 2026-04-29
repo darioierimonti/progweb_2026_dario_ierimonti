@@ -1,6 +1,7 @@
 const Model = require('./Model');
 const { query } = require("../db");
 const { createHash } = require('node:crypto');
+const jwt = require("jsonwebtoken");
 
 /**
  * @property {int} id
@@ -61,8 +62,38 @@ class User extends Model {
         return rows[0] || null;
     }
 
+    static async tokenAuthenticate(token) {
+        let payload;
+
+        try {
+            payload = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return null;
+        }
+
+        if (!payload) {
+            return null;
+        }
+
+        const { id, email } = payload;
+
+        if (!id || !email) {
+            return null;
+        }
+
+        return this.findById(id);
+    }
+
     isAdmin() {
         return this.role === User.ADMIN;
+    }
+
+    get token() {
+        const payload = {
+            id: this.id,
+            email: this.email,
+        };
+        return jwt.sign(payload, process.env.JWT_SECRET);
     }
 }
 
