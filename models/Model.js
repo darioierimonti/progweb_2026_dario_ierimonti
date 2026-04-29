@@ -1,6 +1,7 @@
 const { query } = require('../db');
 
 class Model {
+
     static get table() {
         throw new Error('tableName must be implemented');
     }
@@ -15,6 +16,7 @@ class Model {
 
     static findAll() {
         return query(`SELECT * FROM ${this.table}`);
+
     }
 
     static async findById(id) {
@@ -22,7 +24,12 @@ class Model {
             `SELECT ${this.fields} FROM ${this.table} WHERE ${this.primaryKey} = ?`,
             [id]
         );
-        return rows[0] || null;
+
+        if(rows.length === 0) {
+            return null;
+        }
+
+        return new this(rows[0]);
     }
 
     static async create(data) {
@@ -54,6 +61,14 @@ class Model {
             [id]
         );
         return result.affectedRows > 0;
+    }
+
+    constructor(data) {
+        this.populate(data);
+    }
+
+    populate(data) {
+        Object.assign(this, data);
     }
 }
 
