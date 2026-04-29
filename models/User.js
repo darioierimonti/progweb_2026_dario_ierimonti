@@ -59,7 +59,11 @@ class User extends Model {
     static async authenticate(email, password) {
         password = this.hashPassword(password);
         const rows = await query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
-        return rows[0] || null;
+        if (rows.length === 0) {
+            return null;
+        }
+
+        return new User(rows[0]);
     }
 
     static async tokenAuthenticate(token) {

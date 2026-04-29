@@ -4,8 +4,19 @@ const { pool } = require('../db');
 
 const page = {
     baseUrl: null,
+
     visit: async function(path) {
         return await fetch(`${this.baseUrl}${path}`);
+    },
+
+    post: async function(path, data) {
+        return await fetch(`${this.baseUrl}${path}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
     }
 };
 
@@ -18,7 +29,6 @@ before(() => {
 
 after(async () => {
     server.close();
-    pool.end();
 });
 
 module.exports = page;
