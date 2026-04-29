@@ -3,8 +3,6 @@ const app = express();
 
 app.use(express.json());
 
-app.set('view engine', 'ejs')
-
 /**
  * load routes
  */
